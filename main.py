@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 # initialize the pygame
 
@@ -23,9 +24,9 @@ playerX_change = 0
 # enemy
 
 enemyimg = pygame.image.load('alien.png')
-enemyX = random.randint(0, 800)
+enemyX = random.randint(0, 735)
 enemyY = random.randint(50, 150)
-enemyX_change = 0.3
+enemyX_change = 0.2
 enemyY_change = 40
 
 # Bullet
@@ -34,8 +35,10 @@ bulletimg = pygame.image.load('bullet.png')
 bulletX = 0
 bulletY = 480
 bulletX_change = 0
-bulletY_change = 10
+bulletY_change = 1
 bullet_state = "ready"
+
+score = 0
 
 
 def player(x, y):
@@ -50,6 +53,14 @@ def fire_bullet(x, y):
     global bullet_state
     bullet_state = "fire"
     screen.blit(bulletimg, (x + 16, y + 10))
+
+
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt((math.pow(enemyX - bulletX, 2)) + (math.pow(enemyY - bulletY, 2)))
+    if distance < 27:
+        return True
+    else:
+        return False
 
 
 # game loop
@@ -71,8 +82,8 @@ while running:
                 playerX_change = 0.3
             if event.key == pygame.K_SPACE:
                 if bullet_state is "ready":
-                  bulletX = playerX
-                  fire_bullet(playerX, bulletY)
+                    bulletX = playerX
+                    fire_bullet(playerX, bulletY)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -92,7 +103,7 @@ while running:
         enemyX_change = -0.3
         enemyY += enemyY_change
 
-# bullet movement
+    # bullet movement
     if bulletY <= 0:
         bulletY = 480
         bullet_state = "ready"
@@ -101,8 +112,18 @@ while running:
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_change
 
+    # collision
+    collision = isCollision(enemyX, enemyY, bulletX, bulletY)
+    if collision:
+        bulletY = 480
+        bullet_state = "ready"
+        score += 1
+        print(score)
+        enemyX = random.randint(0, 735)
+        enemyY = random.randint(50, 150)
+
+
     player(playerX, playerY)
     enemy(enemyX, enemyY)
 
     pygame.display.update()
-
